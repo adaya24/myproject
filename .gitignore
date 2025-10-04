@@ -1,0 +1,27 @@
+# Project Root / General
+# ------------------------------------
+.DS_Store
+.vscode/  # Ignore VS Code workspace settings
+*.log
+*.sqlite
+__pycache__/
+
+# ------------------------------------
+# Python/Backend (Person A)
+# ------------------------------------
+# Virtual Environment
+/backend/venv/
+/backend/.env
+# Compiled Python files
+*.pyc
+# Python utility folders (if used)
+.pytest_cache/
+.mypy_cache/
+
+# ------------------------------------
+# JavaScript/Frontend (Person B)
+# ------------------------------------
+/frontend/node_modules
+/frontend/dist/     # Vite build output
+/frontend/.env      # Frontend environment files (if used)
+/frontend/build     # React build output (if not using Vite/dist)
