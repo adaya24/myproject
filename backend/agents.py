@@ -1,23 +1,5 @@
-
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware   # <-- add this line
-from .schemas import RecoveryPlan, UserInput, AgentResponse
-from .agents import run_multi_agent_stub
-
-
-app = FastAPI()
-origins = [
-    "http://localhost:5173",  # React dev server
-    "http://127.0.0.1:5173"
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,      # Allow frontend origins
-    allow_credentials=True,
-    allow_methods=["*"],        # Allow all HTTP methods
-    allow_headers=["*"],        # Allow all headers
-)
+from .schemas import RecoveryPlan, AgentResponse, UserInput
+from typing import Dict, Any
 
 # Mock data simulating a successful run of the four AI agents
 MOCK_AGENT_DATA = [
@@ -49,9 +31,12 @@ def run_multi_agent_stub(user_input: UserInput) -> RecoveryPlan:
 
     Args:
         user_input: The Pydantic model containing the user's feelings and image.
+
+    Returns:
+        A RecoveryPlan object filled with mock responses.
     """
     # NOTE: We can inspect the user input here, but we return fixed mock data for the stub.
-    print(f"Received input: {user_input.feelings_description[:50]}...")
+    print(f"Received user input: {user_input.feelings_description[:50]}...")
     
     summary = "The team has analyzed your input. We recognize your distress but strongly advise focusing on self-discipline and forward momentum. Review the coordinated plan below."
     
@@ -59,9 +44,5 @@ def run_multi_agent_stub(user_input: UserInput) -> RecoveryPlan:
         summary=summary,
         agents=MOCK_AGENT_DATA
     )
-@app.post("/run_agents", response_model=RecoveryPlan)
-def run_agents(user_input: UserInput):
-    """
-    Endpoint that returns a mock recovery plan using the stub function.
-    """
-    return run_multi_agent_stub(user_input)
+
+# On Day 2, this function will be replaced by actual Gemini API calls.
