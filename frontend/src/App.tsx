@@ -1,3 +1,5 @@
+// Define the expected structure of the API response
+
 import { Routes, Route } from 'react-router-dom';
 import Recovery from './pages/Recovery'; // <--- This line imports the Recovery component
 
