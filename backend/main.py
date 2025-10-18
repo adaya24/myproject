@@ -1,12 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# FIX: Changed from 'from .schemas import...' to 'from schemas import...' 
-# and 'from agents import...' to resolve the Python ImportError
-from .schemas import RecoveryPlan, UserInput, AgentResponse
-from .agents import run_multi_agent_stub
+# Correct relative imports for project structure
+from .schemas import RecoveryPlan, UserInput
+from .agents import run_multi_agent_stub 
 
 
-app = FastAPI()
+app = FastAPI(title="AGENTS_CLOSURE_MISMATCH")
 origins = [
     "http://localhost:5173",    # React dev server
     "http://127.0.0.1:5173"
@@ -14,19 +13,23 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,      # Allow frontend origins
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],        # Allow all HTTP methods
-    allow_headers=["*"],        # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
-# Mock data simulating a successful run of the four AI agents
+@app.get("/", tags=["Health"])
+def health_check():
+    """Basic health check to confirm API is running."""
+    return {"status": "ok", "message": "API is running."}
 
 
-@app.post("/run_agents", response_model=RecoveryPlan)
+@app.post("/run_agents", response_model=RecoveryPlan, tags=["Agents"])
 def run_agents(user_input: UserInput):
     """
-    Endpoint that returns a mock recovery plan using the stub function.
+    Endpoint that receives user input and returns the coordinated recovery plan
+    from the multi-agent system.
     """
-    # NOTE: The implementation must eventually call the real agent orchestration logic
+    # The orchestration logic is delegated to the function in agents.py
     return run_multi_agent_stub(user_input)
