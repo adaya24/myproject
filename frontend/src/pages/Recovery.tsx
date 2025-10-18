@@ -1,102 +1,167 @@
 import { useState } from 'react';
-// We are using the most aggressive path fix here, assuming Recovery.tsx is deep (src/pages/Recovery.tsx) 
-// and needs to go up two levels to find 'components' sibling of 'pages'.
-import { Button } from '../components/ui/button'; 
-// These imports assume the files are direct siblings of the 'pages' folder (src/types.ts, src/api/...)
-import { AgentResponse } from '../types'; 
+import { Button } from '../components/ui/button';
+import { RecoveryPlan, UserInput, AgentResponse } from '../types';
 import { getRecoveryPlan } from '../api/recoveryService';
+import AgentCard from '../components/AgentCard';
+import { cn } from '../lib/utils';
 
 const Recovery = () => {
-    // --- 1. INITIALIZE STATE VARIABLES ---
-    const [userFeeling, setUserFeeling] = useState<string>('');
-    const [agentResponse, setAgentResponse] = useState<AgentResponse | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
-    
-    // --- 2. SUBMISSION HANDLER ---
+    const [userFeeling, setUserFeeling] = useState('');
+    const [recoveryPlan, setRecoveryPlan] = useState<RecoveryPlan | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState('');
+
     const handleSubmit = async () => {
         if (isLoading || !userFeeling.trim()) return;
-
+        
         setIsLoading(true);
-        setAgentResponse(null); // Clear previous results
-        setError(null);
-
+        setError('');
         try {
-            const requestData = { user_feeling: userFeeling };
-            // 3. Use the real API service
-            const data = await getRecoveryPlan(requestData); 
-            
-            console.log("API Response Received (Day 2 Goal):", data); 
-            
-            setAgentResponse(data);
+            const userInput: UserInput = { 
+                feelings_description: userFeeling 
+            };
+            const plan = await getRecoveryPlan(userInput);
+            setRecoveryPlan(plan);
         } catch (err) {
-            console.error("Agent analysis failed:", err);
-            setError(err instanceof Error ? err.message : "An unknown error occurred during analysis.");
+            setError('Failed to fetch recovery plan. Please try again.');
+            console.error('Error fetching recovery plan:', err);
         } finally {
             setIsLoading(false);
-            setUserFeeling(''); // Clear the input field after submission
         }
     };
 
-    // --- 3. JSX RENDERING ---
     return (
-        <div className="flex flex-col items-center min-h-screen p-4 bg-zinc-50 dark:bg-zinc-900 font-inter">
-            <h1 className="text-4xl font-extrabold text-red-600 dark:text-red-400 mb-4 mt-12">
-                💔 AI Breakup Recovery Team
-            </h1>
-            <p className="text-lg text-zinc-600 dark:text-zinc-300 mb-8 max-w-2xl text-center">
-                Describe your current emotions and situation below. The four specialized AI agents will generate a comprehensive recovery plan for you.
-            </p>
-
-            {/* --- Input Form Area --- */}
-            <div className="w-full max-w-3xl bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-2xl border border-red-200 dark:border-red-700">
-                <textarea
-                    className="w-full p-4 border border-gray-300 dark:border-zinc-700 rounded-lg text-zinc-800 dark:text-zinc-200 bg-zinc-50 dark:bg-zinc-700 
-                                 focus:ring-red-500 focus:border-red-500 transition duration-150 resize-none"
-                    rows={6}
-                    placeholder="Tell us how you're feeling, or what you're struggling with today (e.g., 'I miss them badly and feel like texting them.')"
-                    value={userFeeling}
-                    onChange={(e) => setUserFeeling(e.target.value)}
-                    disabled={isLoading}
-                />
-                
-                <Button 
-                    onClick={handleSubmit}
-                    disabled={isLoading || !userFeeling.trim()}
-                    variant="default" 
-                    className={`mt-4 w-full px-4 py-3 font-semibold rounded-xl transition duration-300 shadow-lg ${
-                        isLoading ? 'bg-gray-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 active:bg-red-800'
-                    }`}
-                >
-                    {isLoading ? 'Processing Agents... Please Wait' : 'Get Recovery Plan (Run Agents)'}
-                </Button>
-            </div>
-            
-            {/* --- Error Display Area --- */}
-            {error && (
-                <div className="w-full max-w-3xl mt-6 p-4 bg-yellow-100 border border-yellow-500 text-yellow-800 rounded-lg shadow-md">
-                    <p className="font-semibold">Connection Error:</p>
-                    <p>{error}</p>
-                </div>
-            )}
-
-            {/* --- Response Display Area (Day 2 Goal: Show Therapist Only) --- */}
-            {agentResponse && (
-                <div className="w-full max-w-3xl mt-10 space-y-6">
-                    <div className="p-6 bg-red-100 dark:bg-red-900/50 rounded-xl shadow-xl border-l-4 border-red-600">
-                        <h2 className="text-2xl font-bold text-red-800 dark:text-red-300 mb-3">
-                            🫂 Therapist Agent (Empathy & Coping)
-                        </h2>
-                        <p className="text-zinc-700 dark:text-zinc-200 whitespace-pre-wrap">
-                            {agentResponse.therapist_agent}
-                        </p>
+        <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-orange-50 py-8 px-4">
+            <div className="max-w-6xl mx-auto">
+                {/* Enhanced Header Section */}
+                <div className="text-center mb-12">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-6">
+                        <span className="text-3xl">💔</span>
                     </div>
-
-                    <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
-                        (The other 3 agent responses will appear here after Day 4 integration)
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent mb-4">
+                        AI Breakup Recovery Team
+                    </h1>
+                    <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        Describe your current emotions and situation below. The four specialized AI agents will generate a comprehensive recovery plan for you.
                     </p>
                 </div>
-            )}
+
+                {/* Enhanced Input Section */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-2xl p-8 mb-12 max-w-4xl mx-auto border border-red-100">
+                    <div className="space-y-6">
+                        <textarea
+                            className="w-full p-6 border-2 border-gray-200 rounded-xl text-gray-800 bg-white/50 
+                                     focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-300 
+                                     resize-none text-lg placeholder-gray-400 shadow-inner"
+                            rows={6}
+                            placeholder="Tell us how you're feeling, or what you're struggling with today (e.g., 'I miss them badly and feel like texting them.')"
+                            value={userFeeling}
+                            onChange={(e) => setUserFeeling(e.target.value)}
+                            disabled={isLoading}
+                        />
+                        
+                        <div className="flex justify-center">
+                            <Button 
+                                onClick={handleSubmit}
+                                disabled={isLoading || !userFeeling.trim()}
+                                className={cn(
+                                    "px-12 py-6 text-lg font-bold rounded-2xl transition-all duration-300 shadow-2xl",
+                                    "bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700",
+                                    "transform hover:scale-105 active:scale-95",
+                                    isLoading && "bg-gray-500 cursor-not-allowed hover:scale-100"
+                                )}
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center gap-3">
+                                        <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
+                                        Processing Agents... Please Wait
+                                    </span>
+                                ) : (
+                                    'Get Recovery Plan (Run Agents)'
+                                )}
+                            </Button>
+                        </div>
+                    </div>
+                    
+                    {error && (
+                        <div className="mt-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-800 rounded-xl shadow-md">
+                            <p className="font-semibold">Connection Error:</p>
+                            <p>{error}</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Enhanced Results Section */}
+                {recoveryPlan && (
+                    <div className="space-y-8">
+                        {/* Summary Section with Better Styling */}
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-2xl p-8 shadow-2xl max-w-4xl mx-auto">
+                            <div className="flex items-center gap-4 mb-4">
+                                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                    <span className="text-xl">👑</span>
+                                </div>
+                                <h2 className="text-2xl font-bold">Team Leader Summary</h2>
+                            </div>
+                            <p className="text-lg leading-relaxed text-white/90">
+                                {recoveryPlan.summary}
+                            </p>
+                        </div>
+
+                        {/* Agent Cards Section */}
+                        <div className="text-center mb-8">
+                            <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                                Your AI Recovery Team
+                            </h2>
+                            <p className="text-gray-600 mt-2">Four specialized agents working together for your recovery</p>
+                        </div>
+                        
+                        {/* Enhanced Agent Cards Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {recoveryPlan.agents.map((agent: AgentResponse, index: number) => (
+                                <div 
+                                    key={index}
+                                    className={cn(
+                                        "transform transition-all duration-500 hover:scale-105 hover:rotate-1",
+                                        "animate-fade-in-up"
+                                    )}
+                                    style={{ animationDelay: `${index * 100}ms` }}
+                                >
+                                    <AgentCard
+                                        agent_name={agent.agent_name}
+                                        role={agent.role}
+                                        advice={agent.advice}
+                                        className={cn(
+                                            "h-full shadow-2xl border-0",
+                                            index === 0 && "bg-gradient-to-br from-blue-50 to-blue-100",
+                                            index === 1 && "bg-gradient-to-br from-green-50 to-green-100", 
+                                            index === 2 && "bg-gradient-to-br from-purple-50 to-purple-100",
+                                            index === 3 && "bg-gradient-to-br from-orange-50 to-orange-100"
+                                        )}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Enhanced Empty State */}
+                {!recoveryPlan && !isLoading && (
+                    <div className="text-center py-16">
+                        <div className="w-32 h-32 bg-gradient-to-r from-red-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                            <span className="text-5xl">💭</span>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-700 mb-4">
+                            Ready to help you feel better
+                        </h3>
+                        <p className="text-gray-500 text-lg max-w-md mx-auto">
+                            Share your feelings above to get started with your personalized recovery plan from our AI team
+                        </p>
+                    </div>
+                )}
+            </div>
+
+            {/* Add some custom animations */}
+          
         </div>
     );
 };

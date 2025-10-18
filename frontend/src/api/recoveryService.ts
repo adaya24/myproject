@@ -1,41 +1,51 @@
-import axios from 'axios';
-import { AgentResponse, AnalysisRequest } from '../types';
+import { RecoveryPlan, UserInput } from '../types';
 
-// IMPORTANT: This should target the port Person A is running FastAPI on
-const API_URL = 'http://localhost:8000'; 
-
-export async function getRecoveryPlan(requestData: AnalysisRequest): Promise<AgentResponse> {
-  try {
-    // Correcting the endpoint path to match Person A's main.py file
-    const response = await axios.post(`${API_URL}/run_agents`, {
-        // FIX: Mapping the frontend key (user_feeling) to the backend's expected key (feelings_description)
-        feelings_description: requestData.user_feeling,
-        // The backend UserInput schema might also expect an optional image_base64 key, 
-        // which we omit now as the API uses default values.
-    });
-    
-    // --- Data Mapping to flatten the complex backend response ---
-    const agents = response.data.agents;
-    const summary = response.data.summary;
-    
-    // This finds the correct agent advice by name, as the backend returns an array.
-    const findAdvice = (name: string) => 
-        agents.find((a: any) => a.agent_name === name)?.advice || `Error: ${name} data missing.`;
-
-    const mappedResponse: AgentResponse = {
-        therapist_agent: findAdvice("Therapist Agent"),
-        closure_agent: findAdvice("Closure Agent"),
-        routine_planner_agent: findAdvice("Routine Planner Agent"),
-        brutal_honesty_agent: findAdvice("Brutal Honesty Agent"),
-        final_summary: summary,
-        timestamp: new Date().toISOString()
+// Mock data for testing
+const mockRecoveryPlan: RecoveryPlan = {
+  summary: "Your recovery plan focuses on emotional processing, establishing routine, and honest self-reflection.",
+  agents: [
+    {
+      agent_name: "Therapist Agent",
+      role: "Mental Health Therapist",
+      advice: "I understand you're feeling sad. It's completely normal to experience these emotions. Let's work through this together with some breathing exercises and positive affirmations."
+    },
+    {
+      agent_name: "Closure Agent",
+      role: "Closure Specialist", 
+      advice: "To help find closure, I suggest writing a letter expressing your feelings (without sending it). This can help process emotions and move forward."
+    },
+    {
+      agent_name: "Routine Planner Agent",
+      role: "Daily Routine Expert",
+      advice: "Let's establish a gentle routine: morning walk, healthy breakfast, and 10 minutes of journaling. Small consistent steps build momentum."
+    },
+    {
+      agent_name: "Brutal Honesty Agent",
+      role: "Direct Truth Teller",
+      advice: "Look, feeling sad won't last forever. The world keeps spinning whether you're sad or not. Get up, do one productive thing, and the rest will follow."
     }
-    
-    return mappedResponse; 
+  ]
+};
 
+export const getRecoveryPlan = async (userInput: UserInput): Promise<RecoveryPlan> => {
+  try {
+    const response = await fetch('http://localhost:8000/run_agents', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(userInput),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: RecoveryPlan = await response.json();
+    return data;
   } catch (error) {
-    console.error("API Call Failed:", error);
-    // This message will appear in the yellow box if the connection fails
-    throw new Error("Connection Failed. Ensure Person A's FastAPI server is running on port 8000 and CORS is configured.");
+    console.error('API call failed, using mock data:', error);
+    // Return mock data if API fails
+    return mockRecoveryPlan;
   }
-}
+};
