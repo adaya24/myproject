@@ -1,13 +1,15 @@
 export interface AgentResponse {
-    therapist_agent: string;
-    closure_agent: string;
-    routine_planner_agent: string;
-    brutal_honesty_agent: string;
-    final_summary?: string; 
-    timestamp?: string;
+  agent_name: string;
+  role: string;
+  advice: string;
 }
 
-export interface AnalysisRequest {
-    user_feeling: string;
-    // image_base64?: string; 
+export interface RecoveryPlan {
+  summary: string;
+  agents: AgentResponse[];
+}
+
+export interface UserInput {
+  feelings_description: string;
+  image_base64?: string;
 }

@@ -7,19 +7,24 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        inter: ['Inter', 'sans-serif'], // Define custom font
+        inter: ['Inter', 'sans-serif'],
       },
       colors: {
-        // Defining primary colors to match the app theme (Red/Recovery)
         primary: {
-          DEFAULT: '#dc2626', // Tailwind red-600
+          DEFAULT: '#dc2626',
           foreground: '#ffffff',
-          '90': '#c01e1e', // Tailwind red-700
+          '90': '#c01e1e',
         },
         destructive: {
-          DEFAULT: '#b91c1c', // Tailwind red-700
+          DEFAULT: '#b91c1c',
           foreground: '#ffffff',
         }
+      },
+      backdropBlur: {
+        xs: '2px',
+      },
+      animation: {
+        'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
       }
     },
   },
