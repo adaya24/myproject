@@ -25,8 +25,16 @@ export default {
       },
       animation: {
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+      },
+      // Add line-clamp utilities
+      lineClamp: {
+        2: '2',
+        3: '3',
+        4: '4',
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/line-clamp'),
+  ],
 }
