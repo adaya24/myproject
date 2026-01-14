@@ -25,3 +25,5 @@ __pycache__/
 /frontend/dist/     # Vite build output
 /frontend/.env      # Frontend environment files (if used)
 /frontend/build     # React build output (if not using Vite/dist)
+.env
+*.env
