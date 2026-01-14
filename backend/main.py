@@ -1,35 +1,54 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# Correct relative imports for project structure
-from .schemas import RecoveryPlan, UserInput
-from .agents import run_multi_agent_stub 
 
+app = FastAPI(title="Breakup Recovery AI Agent", version="1.0.0")
 
-app = FastAPI(title="AGENTS_CLOSURE_MISMATCH")
-origins = [
-    "http://localhost:5173",    # React dev server
-    "http://127.0.0.1:5173"
-]
-
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=["*"],  # Allows all origins
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
-@app.get("/", tags=["Health"])
+@app.get("/")
+def read_root():
+    return {
+        "message": "Breakup Recovery AI Agent API",
+        "endpoints": {
+            "GET /": "This info page",
+            "POST /run_agents": "Run all 4 AI agents with user input",
+            "GET /docs": "Interactive API documentation"
+        },
+        "agents": [
+            "Therapist Agent - Emotional support",
+            "Closure Agent - Cathartic writing",
+            "Routine Planner - Daily structure",
+            "Brutal Honesty - Objective insights"
+        ]
+    }
+
+@app.post("/run_agents")
+def run_agents(user_input: dict):
+    """
+    Run all four AI agents with the user's feelings description.
+    
+    Example request:
+    ```json
+    {
+        "feelings_description": "I just broke up and feel completely lost"
+    }
+    ```
+    """
+    # Import here to avoid circular imports
+    from .agents import run_multi_agent_stub
+    from .schemas import UserInput
+    
+    # Convert dict to UserInput
+    user_input_obj = UserInput(**user_input)
+    return run_multi_agent_stub(user_input_obj)
+
+@app.get("/health")
 def health_check():
-    """Basic health check to confirm API is running."""
-    return {"status": "ok", "message": "API is running."}
-
-
-@app.post("/run_agents", response_model=RecoveryPlan, tags=["Agents"])
-def run_agents(user_input: UserInput):
-    """
-    Endpoint that receives user input and returns the coordinated recovery plan
-    from the multi-agent system.
-    """
-    # The orchestration logic is delegated to the function in agents.py
-    return run_multi_agent_stub(user_input)
+    return {"status": "healthy", "service": "breakup-recovery-agent"}
