@@ -1,15 +1,16 @@
-// Define the expected structure of the API response
-
+// src/App.tsx
+// src/App.tsx - FIXED
 import { Routes, Route } from 'react-router-dom';
-import Recovery from './pages/Recovery'; // <--- This line imports the Recovery component
+import LandingPage from './pages/LandingPage';
+import InputPage from './pages/InputPage';
+import Recovery from './pages/Recovery';
 
 function App() {
   return (
-    // ...
     <Routes>
-      {/* This line uses the imported Recovery component as the element for the homepage */}
-      <Route path="/" element={<Recovery />} /> 
-      {/* ... */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/input" element={<InputPage />} />
+      <Route path="/recovery" element={<Recovery />} />
     </Routes>
   );
 }

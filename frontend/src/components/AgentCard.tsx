@@ -1,3 +1,4 @@
+// src/components/ui/AgentCard.tsx
 import * as React from "react"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
@@ -28,7 +29,7 @@ const formatAdviceText = (text: string, agentName: string) => {
       if (line.startsWith('## ')) {
         return (
           <div key={index} className="mt-4 mb-2 first:mt-0">
-            <h4 className="font-bold text-blue-700 text-sm uppercase tracking-wide">
+            <h4 className="font-bold text-blue-700 text-sm uppercase tracking-wide break-words">
               {line.replace('## ', '')}
             </h4>
           </div>
@@ -38,8 +39,10 @@ const formatAdviceText = (text: string, agentName: string) => {
       else if (line.trim().startsWith('•')) {
         return (
           <div key={index} className="flex items-start ml-2 mb-1">
-            <span className="text-gray-500 mr-2 mt-0.5">•</span>
-            <span className="text-gray-700 text-sm flex-1">{line.replace('•', '').trim()}</span>
+            <span className="text-gray-500 mr-2 mt-0.5 flex-shrink-0">•</span>
+            <span className="text-gray-700 text-sm flex-1 break-words">
+              {line.replace('•', '').trim()}
+            </span>
           </div>
         );
       }
@@ -47,7 +50,7 @@ const formatAdviceText = (text: string, agentName: string) => {
       else if (line.trim()) {
         return (
           <div key={index} className="mb-1">
-            <span className="text-gray-700 text-sm">{line}</span>
+            <span className="text-gray-700 text-sm break-words">{line}</span>
           </div>
         );
       }
@@ -59,7 +62,7 @@ const formatAdviceText = (text: string, agentName: string) => {
   // For other agents, use simple line breaks
   return text.split('\n').map((line, index) => (
     <React.Fragment key={index}>
-      {line}
+      <span className="break-words">{line}</span>
       {index < text.split('\n').length - 1 && <br />}
     </React.Fragment>
   ));
@@ -84,20 +87,21 @@ const AgentCard: React.FC<AgentCardProps> = ({
         <div className="flex items-center gap-3">
           <div className="text-2xl flex-shrink-0">{icon}</div>
           <div className="min-w-0 flex-1">
-            <CardTitle className="text-lg font-bold text-gray-800 truncate">
+            <CardTitle className="text-lg font-bold text-gray-800 truncate break-words">
               {agent_name}
             </CardTitle>
-            <CardDescription className="text-sm text-gray-600 font-medium mt-1 line-clamp-2">
+            <CardDescription className="text-sm text-gray-600 font-medium mt-1 line-clamp-2 break-words">
               {role}
             </CardDescription>
           </div>
         </div>
       </CardHeader>
       
-      <CardContent className="flex-1 overflow-y-auto py-2">
+      <CardContent className="flex-1 min-h-0 overflow-hidden py-2">
         <div className={cn(
           "bg-white/50 rounded-lg p-4 border border-gray-200/50 h-full",
-          "text-gray-700 text-sm leading-relaxed",
+          "text-gray-700 text-sm leading-relaxed custom-scrollbar",
+          "overflow-y-auto max-h-[300px] break-words whitespace-pre-wrap",
           agent_name === "Routine Planner Agent" && "space-y-1"
         )}>
           {formatAdviceText(advice, agent_name)}
